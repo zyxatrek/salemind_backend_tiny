@@ -166,6 +166,66 @@ func (s *GenerationService) SubmitImageTask(prompt string) (string, error) {
 	return "", fmt.Errorf("failed to submit image task: %s", string(body))
 }
 
+func (s *GenerationService) GetImageTaskStatus(uUID string) (string, model.ImageTaskStatus, error) {
+	uri := "/api/generate/webui/status"
+
+	sign, timestamp, nonce := s.generateSignature(uri, s.config.Liblibai.SecretKey)
+	params := fmt.Sprintf("?AccessKey=%s&Signature=%s&Timestamp=%s&SignatureNonce=%s",
+		s.config.Liblibai.AccessKey, sign, timestamp, nonce)
+
+	url := s.config.Liblibai.QueryURL + params
+
+	reqBody := map[string]string{"generateUuid": uUID}
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return "", model.ImageTaskStatusDefault, err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", model.ImageTaskStatusDefault, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", model.ImageTaskStatusDefault, err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return "", model.ImageTaskStatusDefault, err
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return "", model.ImageTaskStatusDefault, err
+	}
+
+	if code, ok := result["code"].(float64); ok && code == 0 {
+		if data, ok := result["data"].(map[string]interface{}); ok {
+			status := data["generateStatus"].(float64)
+			if images, ok := data["images"].([]interface{}); ok && len(images) > 0 {
+				if image, ok := images[0].(map[string]interface{}); ok {
+					if auditStatus, ok := image["auditStatus"].(float64); ok && auditStatus == 3 {
+						if imageURL, ok := image["imageUrl"].(string); ok {
+							return imageURL, model.ImageTaskStatusCompleted, nil
+						}
+					}
+				}
+			}
+			if status == 4 || status == 5 {
+				return "", model.ImageTaskStatusFailed, fmt.Errorf("generation failed or blocked")
+			}
+		}
+	}
+
+	return "", model.ImageTaskStatusProcessing, nil
+}
+
 func (s *GenerationService) WaitImageResult(uUID string) (string, error) {
 	uri := "/api/generate/webui/status"
 
@@ -285,6 +345,48 @@ func (s *GenerationService) CreateVideoTask(imgURL string) (string, error) {
 	}
 
 	return "", fmt.Errorf("failed to create video task: %s", string(body))
+}
+
+func (s *GenerationService) GetVideoaskStatus(taskID string) (string, model.VideoTaskStatus, error) {
+	url := fmt.Sprintf("%s/%s", s.config.Video.TaskURL, taskID)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", model.VideoTaskStatusDefault, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+s.config.Qwen.APIKey)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", model.VideoTaskStatusDefault, err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return "", model.VideoTaskStatusDefault, err
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return "", model.VideoTaskStatusDefault, err
+	}
+
+	if output, ok := result["output"].(map[string]interface{}); ok {
+		if status, ok := output["task_status"].(string); ok {
+			if status == "SUCCEEDED" {
+				if videoURL, ok := output["video_url"].(string); ok {
+					return videoURL, model.VideoTaskStatusCompleted, nil
+				}
+			} else if status == "FAILED" || status == "CANCELED" || status == "UNKNOWN" {
+				return "", model.VideoTaskStatusFailed, fmt.Errorf("video generation failed with status: %s", status)
+			}
+		}
+	}
+
+	return "", model.VideoTaskStatusProcessing, nil
 }
 
 func (s *GenerationService) PollVideo(taskID string) (string, error) {
