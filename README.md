@@ -58,79 +58,66 @@ go run cmd/server/main.go
 ### 1. 创建图像生成任务
 
 ```bash
-curl -X POST http://localhost:8080/api/image_task/create \
-  -H "Content-Type: application/json" \
-  -d '{
-    "keyword": {
-      "pose": "站立",
-      "location": "海边",
-      "time_of_day": "傍晚",
-      "hair_color": "浅绿色",
-      "hairstyle": "偏分直短发",
-      "top_wear": "白衬衫",
-      "bottom_wear": "黑色小裙子",
-      "leg_wear": "黑色丝袜"
-    }
-  }'
+curl -X POST http://43.134.215.212:8081/api/image_task/create -H "Content-Type: application/json" -d '{"keyword":{"pose":"站立","location":"海边","time_of_day":"傍晚","hair_color":"浅绿色","hairstyle":"偏分直短发","top_wear":"白衬衫","bottom_wear":"黑色小裙子","leg_wear":"黑色丝袜"}}'
 ```
 
 响应示例：
 ```json
 {
-  "image_task_id": "468020b6a44f4770857f72fe45e34553"
+  "image_task_id": "a478a7b6926f44179d0f3ed56313cac2"
 }
 ```
 
 ### 2. 查询图像任务状态
 
 ```bash
-curl -X POST http://localhost:8080/api/image_task/status \
+curl -X POST http://43.134.215.212:8081/api/image_task/status \
   -H "Content-Type: application/json" \
   -d '{
-    "task_id": "468020b6a44f4770857f72fe45e34553"
+    "task_id": "a478a7b6926f44179d0f3ed56313cac2"
   }'
 ```
 
 响应示例：
 ```json
 {
-  "status": "SUCCESS",
-  "image_url": "https://example.com/image.png"
+  "status": "completed",
+  "image_url": "https://liblibai-tmp-image.liblib.cloud/img/2404cd2fbdbc477180edc62e1ca84946/c83c877f605a5352ae48f807253728d9d5701eee46a8514071a074226108b1da.png"
 }
 ```
 
 ### 3. 创建视频生成任务
 
 ```bash
-curl -X POST http://localhost:8080/api/video_task/create \
+curl -X POST http://43.134.215.212:8081/api/video_task/create \
   -H "Content-Type: application/json" \
   -d '{
-    "img_url": "https://example.com/image.png"
+    "img_url": "https://liblibai-tmp-image.liblib.cloud/img/2404cd2fbdbc477180edc62e1ca84946/c83c877f605a5352ae48f807253728d9d5701eee46a8514071a074226108b1da.png"
   }'
 ```
 
 响应示例：
 ```json
 {
-  "video_task_id": "task_123456"
+  "video_task_id": "34ebbf70-aba3-4473-84c2-e3568a59a6e0"
 }
 ```
 
 ### 4. 查询视频任务状态
 
 ```bash
-curl -X POST http://localhost:8080/api/video_task/status \
+curl -X POST http://43.134.215.212:8081/api/video_task/status \
   -H "Content-Type: application/json" \
   -d '{
-    "task_id": "task_123456"
+    "task_id": "34ebbf70-aba3-4473-84c2-e3568a59a6e0"
   }'
 ```
 
 响应示例：
 ```json
 {
-  "status": "SUCCESS",
-  "video_url": "https://example.com/video.mp4"
+  "status": "completed",
+  "video_url": "https://dashscope-result-sh.oss-cn-shanghai.aliyuncs.com/1d/26/20250504/8ce2943a/34ebbf70-aba3-4473-84c2-e3568a59a6e0.mp4?Expires=1746393615\u0026OSSAccessKeyId=LTAI5tKPD3TMqf2Lna1fASuh\u0026Signature=ROjPTa7HTXU3FLkaHOmNISMpwtM%3D"
 }
 ```
 

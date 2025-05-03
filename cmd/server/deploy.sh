@@ -10,7 +10,7 @@ REMOTE_CONFIG_DIR=/home/ubuntu/salemind_backend/config    # 远程配置文件�
 APP_NAME=myapp                   # 可执行文件名称
 LOCAL_BUILD_DIR=./               # 本地构建输出路径
 MAIN_FILE=main.go                # Go 项目的入口文件
-LOCAL_CONFIG_DIR=./config        # 本地配置文件目录
+LOCAL_CONFIG_DIR=../../config      # 本地配置文件目录
 CONFIG_FILE=config.yaml         # 配置文件名称
 APP_PORT=8081                    # 应用监听的端口
 
@@ -37,12 +37,8 @@ if [ $? -ne 0 ]; then
 fi
 echo "✅ 上传项目文件成功"
 
-scp -P $REMOTE_PORT $LOCAL_BUILD_DIR$APP_NAME $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/
-if [ $? -ne 0 ]; then
-    echo "❌ 上传失败，请检查网络连接"
-    exit 1
-fi
-echo "✅ 上传配置文件成功"
+# 上传配置文件
+# scp -P 22 ../../config/config.yaml ubuntu@43.134.215.212:/home/ubuntu/salemind_backend/config
 
 echo "🔧 [3/5] 远程启动服务..."
 
