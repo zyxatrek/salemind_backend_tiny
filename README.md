@@ -68,13 +68,30 @@ curl -X POST http://43.134.215.212:8081/api/image_task/create -H "Content-Type: 
 }
 ```
 
-### 2. 查询图像任务状态
+### 2. 创建图像生成任务-从给出的prompt开始
+
+```bash
+curl -X POST http://43.134.215.212:8081/api/image_task/create/raw \
+-H "Content-Type: application/json" \
+-d '{
+  "prompt": "一个美丽的中国传统山水画，有高山、流水和亭台楼阁，风格清新淡雅，色彩和谐。高分辨率，正面视图。"
+}'
+```
+
+响应示例：
+```json
+{
+  "image_task_id": "44fd949948b24221b9b76ebde3316eb3"
+}
+```
+
+### 3. 查询图像任务状态
 
 ```bash
 curl -X POST http://43.134.215.212:8081/api/image_task/status \
   -H "Content-Type: application/json" \
   -d '{
-    "task_id": "a478a7b6926f44179d0f3ed56313cac2"
+    "task_id": "44fd949948b24221b9b76ebde3316eb3"
   }'
 ```
 
@@ -86,7 +103,7 @@ curl -X POST http://43.134.215.212:8081/api/image_task/status \
 }
 ```
 
-### 3. 创建视频生成任务
+### 4. 创建视频生成任务
 
 ```bash
 curl -X POST http://43.134.215.212:8081/api/video_task/create \
@@ -103,7 +120,7 @@ curl -X POST http://43.134.215.212:8081/api/video_task/create \
 }
 ```
 
-### 4. 查询视频任务状态
+### 5. 查询视频任务状态
 
 ```bash
 curl -X POST http://43.134.215.212:8081/api/video_task/status \

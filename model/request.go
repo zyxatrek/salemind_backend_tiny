@@ -17,6 +17,10 @@ type ImageTaskRequest struct {
 	Keyword ImagePromptKeyword `json:"keyword"`
 }
 
+type ImageTaskRawRequest struct {
+	Prompt string `json:"prompt"`
+}
+
 // ImageTaskResponse 创建图像任务响应
 type ImageTaskResponse struct {
 	ImageTaskID string `json:"image_task_id"`

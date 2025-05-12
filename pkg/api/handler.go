@@ -19,6 +19,26 @@ func NewHandler(genSvc *services.GenerationService) *Handler {
 	}
 }
 
+// CreateImageTaskRaw 根据提示词生成图像人物
+func (h *Handler) CreateImageTaskRaw(c *gin.Context) {
+	var req model.ImageTaskRawRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 提交图像生成任务
+	imageID, err := h.genSvc.SubmitImageTask(req.Prompt)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "提交图像任务失败: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.ImageTaskResponse{
+		ImageTaskID: imageID,
+	})
+}
+
 // CreateImageTask 创建图像生成任务
 func (h *Handler) CreateImageTask(c *gin.Context) {
 	var req model.ImageTaskRequest
